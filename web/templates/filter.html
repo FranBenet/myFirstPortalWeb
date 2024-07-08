@@ -1,0 +1,46 @@
+{{define "filter"}}
+    <form class="filter-area">
+        <div class="filter-button-area">
+            <div class="dropdown">
+                <button class="dropbtn">Branch</button>
+                <div class="dropdown-content">
+                    {{range .Manufacture}}
+                    <div class="list-items">  
+                        <input class="manufacture-item" type="checkbox" id="{{.}}">{{.}}
+                    </div> 
+                    {{end}}
+                    <button class="empty-button" type="reset">Clear</button>
+                    <button class="accept-button" type="submit">Accept</button>
+                </div>
+            </div>
+            <div class="dropdown">
+                <button class="dropbtn">Branch</button>
+                <div class="dropdown-content">
+                    {{range .Manufacture}}
+                    <div class="list-items">  
+                        <input class="manufacture-item" type="checkbox" id="{{.}}">{{.}}
+                    </div> 
+                    {{end}}
+                    <button class="empty-button" type="reset">Clear</button>
+                    <button class="accept-button" type="submit">Accept</button>
+                </div>
+            </div>
+            <div class="dropdown">
+                <button class="dropbtn">Branch</button>
+                <div class="dropdown-content">
+                    {{range .Manufacture}}
+                    <div class="list-items">  
+                        <input class="manufacture-item" type="checkbox" id="{{.}}">{{.}}
+                    </div> 
+                    {{end}}
+                    <button class="empty-button" type="reset">Clear</button>
+                    <button class="accept-button" type="submit">Accept</button>
+                </div>
+            </div>
+        </div>
+        <button class="button search-button" type="submit">Search</button>
+    </form>
+    
+{{end}}
+
+

@@ -1,0 +1,26 @@
+{{define "card"}}
+   <a href="to-determine" class="card">
+      <div class="img-area">
+         <img class="img-car" src="http://localhost:3000/api/images/{{.Image}}" alt="Car Image">
+      </div>
+      <div class="info-area">
+         <div class="text-box">
+            <p >{{.Name}}</p>
+         </div>
+         <hr>
+         <div class="text-box">
+            <p>{{.Specs}}</p>
+         </div>
+         <hr>
+         <div class="text-box">
+            <p>{{.CategoryID}}</p>
+         </div>
+         <hr>
+         <div class="text-box">
+            <p>{{.Year}}</p>
+         </div>
+         <hr>
+      </div>
+      <button class="material-symbols-outlined heart-icon favorite-icon">favorite</button>
+   </a>
+{{end}}
