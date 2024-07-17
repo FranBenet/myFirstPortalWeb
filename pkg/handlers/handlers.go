@@ -14,21 +14,19 @@ import (
 // Responds with the index page including the gallery of all the cars from the API.
 func Homepage(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path != "/" {
-		log.Printf("Error. Homepage - Path Not Allowed")
-		http.Error(w, "404 Not Found", http.StatusNotFound)
-		return
+		fmt.Printf("Error. Path Not Allowed")
+		http.Error(w, "Not Found", http.StatusNotFound)
 	}
 	if r.Method != http.MethodGet {
 		w.Header().Set("Allow", http.MethodGet)
 		http.Error(w, "Method is not allowed", http.StatusMethodNotAllowed)
-		log.Println("Error. Homepage - Method Not Allowed")
 		return
 	}
-	fmt.Println("Starting Homepage...")
 
-	//	We store the current URL
+	//	We store the current URL to keep track of redirection when needed.
 	config.RedirectURL = r.URL.String()
 
+	//	Fetch the cars from the API
 	carsDataChannel := make(chan []models.Car, 1)
 	errCarsChannel := make(chan error, 1)
 
@@ -37,25 +35,31 @@ func Homepage(w http.ResponseWriter, r *http.Request) {
 	carsData := <-carsDataChannel
 	err := <-errCarsChannel
 	if err != nil {
-		// log.Printf("Error fetching cars: %v", err)
-		// http.Error(w, "Failed to fetch cars data", http.StatusInternalServerError)
-		// return
+		fmt.Println("Error fetching data from the API.")
+		w.WriteHeader(http.StatusInternalServerError)
+		http.Error(w, "Error fetching data from the API.", http.StatusInternalServerError)
+		return
 	}
 
-	//	Create Small Card for each car.
+	//	Create a small card for each car. Small Card just refers to a variable with sjust few data ot the cars.
 	cards, err := helpers.CreateSmallCardsBatch(carsData)
 	if err != nil {
-		// log.Println("Error Creating Big Cars.")
+		fmt.Println("Error Creating  cards.")
+		w.WriteHeader(http.StatusInternalServerError)
+		http.Error(w, "Error Creating  cards.", http.StatusInternalServerError)
+		return
 	}
-	fmt.Println("Cards Created.")
 
+	//	Fetch data from the API related to manufacturers, categories and models.
 	manufacturers, categories, dataModels, err := helpers.FetchManCatMod()
 	if err != nil {
-		log.Printf("Error Fetching Data from the API:%v", err)
+		fmt.Println("Error fetching data from the API.")
+		w.WriteHeader(http.StatusInternalServerError)
+		http.Error(w, "Error fetching data from the API.", http.StatusInternalServerError)
+		return
 	}
 
-	//	Create the variable to store the data that needs to be send in our HTML Response.
-	//	Add the cards information, the list of categories and manufacturers to their specific key.
+	//	Collect the data to be send with the HTML
 	var data models.DataResponse
 	data.Card = cards
 	data.Categories = categories
@@ -73,51 +77,48 @@ func Homepage(w http.ResponseWriter, r *http.Request) {
 
 	tmpl, err := template.ParseFiles(htmlTemplates...)
 	if err != nil {
-		log.Printf("Error. Homepage - Parsing Template: %v\n", err)
+		fmt.Printf("Error Parsing Template: %v\n", err)
+		w.WriteHeader(http.StatusInternalServerError)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
 
 	err = tmpl.ExecuteTemplate(w, "index.html", data)
 	if err != nil {
-		log.Printf("Error. Homepage - Executing Template: %v\n", err)
+		fmt.Printf("Error Executing Template: %v\n", err)
+		w.WriteHeader(http.StatusInternalServerError)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
-	fmt.Println("HOMEPAGE DONE")
-	fmt.Println()
-	fmt.Println()
-	fmt.Println()
-	fmt.Println()
-	fmt.Println("-------------------------------")
+
 }
 
 // Responds with a page including only the car selected by the user. This includes extra information.
 func SelectCar(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path != "/id" {
-		log.Printf("Error. SelectCar - Path Not Allowed")
+		fmt.Printf("Error. Path Not Allowed")
 		http.Error(w, "404 Not Found", http.StatusNotFound)
 		return
 	}
 	if r.Method != http.MethodGet {
 		w.Header().Set("Allow", http.MethodGet)
-		log.Println("Error. SelectCar - Method Not Allowed")
 		http.Error(w, "Method is not allowed", http.StatusMethodNotAllowed)
 		return
 	}
 
 	//	Getting QUERY key=map from the URL
 	//	(HTML allows to send this type of query: ?id=id_number to be accessed in the server.
-	//	The query is after the ?. The = symbol divides the key from the value.)
+	//	The query is after the ?. The = symbol divides the key from the value.
 	carID, err := strconv.Atoi(r.URL.Query().Get("id"))
 	if err != nil {
 		log.Printf("Error selecting car. Could not convert query into Integer: %v", err)
 		return
 	}
-	// We store the current URL
+
+	//	We store the current URL to keep track of redirection when needed.
 	config.RedirectURL = r.URL.String()
 
-	//	Fetch the selected car.
+	//	Fetch the selected car from the API.
 	carDataChannel := make(chan models.Car, 1)
 	errChannel := make(chan error, 1)
 
@@ -128,18 +129,23 @@ func SelectCar(w http.ResponseWriter, r *http.Request) {
 	close(carDataChannel)
 	close(errChannel)
 	if err != nil {
-		log.Printf("Error fetching car %v: %v", carID, err)
+		fmt.Println("Error fetching car from the API.")
+		w.WriteHeader(http.StatusInternalServerError)
+		http.Error(w, "Error fetching carfrom the API.", http.StatusInternalServerError)
 		return
 	}
 
+	//	We handle the situation where a URL is added with a non-existent car ID by redirecting to main.page.
 	if carID > config.TotalNumCars {
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 	}
-	//	Create a Big Card version of the Car that was selected.
+
+	//	Create a big card for the selected car. Big cards refers to a variable including more data than the one included in the small cards.
 	card, err := helpers.CreateBigCard(carData)
 	if err != nil {
-		log.Printf("Error Creating Big Card: %v", err)
-		http.Error(w, "Failed to create big cards", http.StatusInternalServerError)
+		fmt.Println("Error Creating card.")
+		w.WriteHeader(http.StatusInternalServerError)
+		http.Error(w, "Error Creating card.", http.StatusInternalServerError)
 		return
 	}
 
@@ -157,14 +163,16 @@ func SelectCar(w http.ResponseWriter, r *http.Request) {
 
 	tmpl, err := template.ParseFiles(htmlTemplates...)
 	if err != nil {
-		log.Printf("Error. SelectCar - Parsing Template: %v\n", err)
+		fmt.Printf("Error Parsing Template: %v\n", err)
+		w.WriteHeader(http.StatusInternalServerError)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
 
 	err = tmpl.ExecuteTemplate(w, "card-page.html", data)
 	if err != nil {
-		log.Printf("Error. SelectCar - Executing Template: %v\n", err)
+		fmt.Printf("Error Executing Template: %v\n", err)
+		w.WriteHeader(http.StatusInternalServerError)
 		http.Error(w, "Internal Server Error ID", http.StatusInternalServerError)
 		return
 	}
@@ -174,20 +182,19 @@ func SelectCar(w http.ResponseWriter, r *http.Request) {
 // Modifies the FavouritesMap and CompareMap and Responds by redirecting to the URL where it came from.
 func StatusChange(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path != "/liked-compared" {
+		fmt.Printf("Error. Path Not Allowed")
 		http.Error(w, "404 Not Found", http.StatusNotFound)
-		log.Printf("Error. StatusChange - Path Not Allowed")
 		return
 	}
 	if r.Method != http.MethodPost {
 		w.Header().Set("Allow", http.MethodPost)
 		http.Error(w, "Method is not allowed", http.StatusMethodNotAllowed)
-		log.Printf("Error. StatusChange - Method Not Allowed")
 		return
 	}
 
 	if err := r.ParseForm(); err != nil {
+		fmt.Printf("Error Parsing Form")
 		http.Error(w, "Bad Request", http.StatusBadRequest)
-		log.Printf("Error. StatusChange - Parsing Form")
 		return
 	}
 
@@ -197,7 +204,9 @@ func StatusChange(w http.ResponseWriter, r *http.Request) {
 	//	redirect_url -> information about the current URL for the user, when it submitted the form.
 	carId, err := strconv.Atoi(r.Form.Get("form_id"))
 	if err != nil {
-		log.Printf("Error Status Change. Could not convert query into Integer: %v", err)
+		fmt.Println("Error converting form_id.")
+		w.WriteHeader(http.StatusInternalServerError)
+		http.Error(w, "Error converting form_id.", http.StatusInternalServerError)
 		return
 	}
 	triggeredButton := r.Form.Get("trigger")
@@ -219,14 +228,13 @@ func StatusChange(w http.ResponseWriter, r *http.Request) {
 func ComparePage(w http.ResponseWriter, r *http.Request) {
 
 	if r.URL.Path != "/comparePage" {
+		fmt.Printf("Error. Path Not Allowed")
 		http.Error(w, "404 Not Found", http.StatusNotFound)
-		log.Printf("Error. ComparisonPage - Path Not Allowed")
 		return
 	}
 	if r.Method != http.MethodGet {
 		w.Header().Set("Allow", http.MethodGet)
 		http.Error(w, "Method is not allowed", http.StatusMethodNotAllowed)
-		log.Printf("Error. ComparisonPage - Method Not Allowed")
 		return
 	}
 
@@ -234,13 +242,15 @@ func ComparePage(w http.ResponseWriter, r *http.Request) {
 	var comparedCars []models.Car
 	var err error
 
-	//	Collect the cars from different maps, depending on the URL where the request comes from.
-	// This is done, to allow user "like" a car from the comparison page.
+	//	Collect the cars from different maps, depending if if the request comes from "Last comparison" button or not.
+	// 	Checking the URL is done to allow user "like" a car from the comparison page.
 	if config.RedirectURL != currentURL {
 
 		comparedCars, err = helpers.FetchComparedCars(config.ComparisonMap)
 		if err != nil {
-			log.Printf("Error fetching compared cars: %v", err)
+			fmt.Println("Error fetching data from the API.")
+			w.WriteHeader(http.StatusInternalServerError)
+			http.Error(w, "Error fetching data from the API.", http.StatusInternalServerError)
 			return
 		}
 		helpers.CreateLastCompareMap()
@@ -251,18 +261,23 @@ func ComparePage(w http.ResponseWriter, r *http.Request) {
 
 		comparedCars, err = helpers.FetchComparedCars(config.LastCompare)
 		if err != nil {
-			log.Printf("Error fetching compared cars: %v", err)
+			fmt.Println("Error fetching compared cars.")
+			w.WriteHeader(http.StatusInternalServerError)
+			http.Error(w, "Error fetching compared cars.", http.StatusInternalServerError)
 			return
 		}
 	}
-
+	//	Check that actually there are some cars to be display. Otherwise, redirect to main page.
 	if len(comparedCars) < 2 {
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 	} else {
 		//	Create Big Card for each car.
 		cards, err := helpers.CreateBigCardsBatch(comparedCars)
 		if err != nil {
-			log.Println("Error Creating Big Cars.")
+			fmt.Println("Error creating cards.")
+			w.WriteHeader(http.StatusInternalServerError)
+			http.Error(w, "Error creating cards.", http.StatusInternalServerError)
+			return
 		}
 
 		//	Create a variable to be sent together with the HTML.
@@ -279,14 +294,14 @@ func ComparePage(w http.ResponseWriter, r *http.Request) {
 
 		tmpl, err := template.ParseFiles(htmlTemplates...)
 		if err != nil {
-			log.Printf("Error. ComparisonPage - Parsing Template: %v\n", err)
+			fmt.Printf("Error Parsing Template: %v\n", err)
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			return
 		}
 
 		err = tmpl.ExecuteTemplate(w, "card-page.html", data)
 		if err != nil {
-			log.Printf("Error. ComparisonPage - Executing Template: %v\n", err)
+			fmt.Printf("Error Executing Template: %v\n", err)
 			http.Error(w, "Internal Server Error ID", http.StatusInternalServerError)
 			return
 		}
@@ -296,14 +311,13 @@ func ComparePage(w http.ResponseWriter, r *http.Request) {
 // Responds with a page including all the cars that have been liked.
 func FavouritesPage(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path != "/favouritePage" {
+		fmt.Printf("Error. Path Not Allowed")
 		http.Error(w, "404 Not Found", http.StatusNotFound)
-		log.Printf("Error. FavouritesPage - Path Not Allowed")
 		return
 	}
 	if r.Method != http.MethodGet {
 		w.Header().Set("Allow", http.MethodGet)
 		http.Error(w, "Method is not allowed", http.StatusMethodNotAllowed)
-		log.Printf("Error. FavouritesPage - Method Not Allowed")
 		return
 	}
 
@@ -312,7 +326,9 @@ func FavouritesPage(w http.ResponseWriter, r *http.Request) {
 
 	favouriteCars, err := helpers.FetchFavouriteCars()
 	if err != nil {
-		log.Printf("Error fetching favourite cars: %v", err)
+		fmt.Println("Error fetching data from the API.")
+		w.WriteHeader(http.StatusInternalServerError)
+		http.Error(w, "Error fetching data from the API.", http.StatusInternalServerError)
 		return
 	}
 
@@ -322,7 +338,10 @@ func FavouritesPage(w http.ResponseWriter, r *http.Request) {
 		//	Create Big Card for each car.
 		cards, err := helpers.CreateBigCardsBatch(favouriteCars)
 		if err != nil {
-			log.Println("Error Creating Big Cars.")
+			fmt.Println("Error creating cards.")
+			w.WriteHeader(http.StatusInternalServerError)
+			http.Error(w, "Error creating cards.", http.StatusInternalServerError)
+			return
 		}
 
 		//	Create a variable to be sent together with the HTML.
@@ -339,14 +358,14 @@ func FavouritesPage(w http.ResponseWriter, r *http.Request) {
 
 		tmpl, err := template.ParseFiles(htmlTemplates...)
 		if err != nil {
-			log.Printf("Error. FavouritesPage - Parsing Template: %v\n", err)
+			fmt.Printf("Error Parsing Template: %v\n", err)
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			return
 		}
 
 		err = tmpl.ExecuteTemplate(w, "card-page.html", data)
 		if err != nil {
-			log.Printf("Error. FavouritesPage - Executing Template: %v\n", err)
+			fmt.Printf("Error Executing Template: %v\n", err)
 			http.Error(w, "Internal Server Error ID", http.StatusInternalServerError)
 			return
 		}
@@ -357,6 +376,12 @@ func FavouritesPage(w http.ResponseWriter, r *http.Request) {
 func NoResultsIndex(w http.ResponseWriter) {
 
 	manufacturers, categories, dataModels, err := helpers.FetchManCatMod()
+	if err != nil {
+		fmt.Println("Error fetching data from the API.")
+		w.WriteHeader(http.StatusInternalServerError)
+		http.Error(w, "Error fetching data from the API.", http.StatusInternalServerError)
+		return
+	}
 
 	var data models.DataResponse
 	data.Categories = categories
@@ -374,14 +399,14 @@ func NoResultsIndex(w http.ResponseWriter) {
 
 	tmpl, err := template.ParseFiles(htmlTemplates...)
 	if err != nil {
-		log.Printf("Error. NoResultsIndex - Parsing Template: %v\n", err)
+		fmt.Printf("Error Parsing Template: %v\n", err)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
 
 	err = tmpl.ExecuteTemplate(w, "index.html", data)
 	if err != nil {
-		log.Printf("Error. NoResultsIndex - Executing Template: %v\n", err)
+		fmt.Printf("Error Executing Template: %v\n", err)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
@@ -400,14 +425,14 @@ func NoResultsCardPage(w http.ResponseWriter) {
 	}
 	tmpl, err := template.ParseFiles(htmlTemplates...)
 	if err != nil {
-		log.Printf("Error. NoResultsCardPage - Parsing Template: %v\n", err)
+		fmt.Printf("Error Parsing Template: %v\n", err)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
 
 	err = tmpl.ExecuteTemplate(w, "card-page.html", data)
 	if err != nil {
-		log.Printf("Error. NoResultsCardPage - Executing Template: %v\n", err)
+		fmt.Printf("Error Executing Template: %v\n", err)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
@@ -434,9 +459,8 @@ func LastCompare(w http.ResponseWriter, r *http.Request) {
 	//	FetchComparedCars collects all the cars marked to be Compared
 	//	and stores them in comparedCars variable.
 	comparedCars, err := helpers.FetchComparedCars(config.LastCompare)
-
 	if err != nil {
-		log.Printf("Error finding last compared cars: %v", err)
+		fmt.Printf("Error finding last compared cars: %v", err)
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 		return
 	}
@@ -447,7 +471,10 @@ func LastCompare(w http.ResponseWriter, r *http.Request) {
 		//	Create Big Card for each car.
 		cards, err := helpers.CreateBigCardsBatch(comparedCars)
 		if err != nil {
-			log.Println("Error Creating Big Cars.")
+			fmt.Println("Error creating cards.")
+			w.WriteHeader(http.StatusInternalServerError)
+			http.Error(w, "Error creating cards.", http.StatusInternalServerError)
+			return
 		}
 
 		//	Create a variable to be sent together with the HTML.
@@ -464,14 +491,14 @@ func LastCompare(w http.ResponseWriter, r *http.Request) {
 
 		tmpl, err := template.ParseFiles(htmlTemplates...)
 		if err != nil {
-			log.Printf("Error. Last Compare Page - Parsing Template: %v\n", err)
+			fmt.Printf("Error Parsing Template: %v\n", err)
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			return
 		}
 
 		err = tmpl.ExecuteTemplate(w, "card-page.html", data)
 		if err != nil {
-			log.Printf("Error. Last Comapre Page - Executing Template: %v\n", err)
+			fmt.Printf("Error Executing Template: %v\n", err)
 			http.Error(w, "Internal Server Error ID", http.StatusInternalServerError)
 			return
 		}
@@ -480,43 +507,44 @@ func LastCompare(w http.ResponseWriter, r *http.Request) {
 
 // Takes the filters or search request and Responds with the cars that matches.
 func Filter(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("FILTER PAGE STARTING...")
-	fmt.Println()
-
 	if r.URL.Path != "/search" {
 		http.Error(w, "404 Not Found", http.StatusNotFound)
-		log.Printf("Error. Filter - Path Not Allowed")
+		log.Printf("Error. ComparisonPage - Path Not Allowed")
 		return
 	}
 	if r.Method != http.MethodGet {
 		w.Header().Set("Allow", http.MethodGet)
 		http.Error(w, "Method is not allowed", http.StatusMethodNotAllowed)
-		log.Printf("Error. Filter - Method Not Allowed")
+		log.Printf("Error. ComparisonPage - Method Not Allowed")
 		return
 	}
 
 	if err := r.ParseForm(); err != nil {
+		fmt.Printf("Error Parsing Form")
 		http.Error(w, "Bad Request", http.StatusBadRequest)
-		log.Printf("Error. Filter - Parsing Form")
 		return
 	}
 
 	helpers.ClearAllFilters()
-	fmt.Println("All filter cleaned.")
 
 	config.RedirectURL = r.URL.String()
+
 	//	Get the Form input. This allows us to know what button triggered the submission.
 	action := r.FormValue("action")
 
 	//	In case there is no string in the action. That means the search bar triggered the submission.
 	if action == "" {
+
 		//	We get the query from the searchbar and check if it has content or not.
 		query := r.FormValue("searchRequest")
+
 		if query != "" {
 			filteredCars, err := helpers.SearchQueryCars(query)
 			if err != nil {
-				log.Printf("Error searching cars from the query", err)
-				//	WE DO SOMETHING
+				fmt.Println("Error filtering data.")
+				w.WriteHeader(http.StatusInternalServerError)
+				http.Error(w, "Error filtering data.", http.StatusInternalServerError)
+				return
 			}
 			//	Check the number of cars fetched to determine whether we display a
 			//	"0 results found" or not.
@@ -525,13 +553,18 @@ func Filter(w http.ResponseWriter, r *http.Request) {
 			} else {
 				cards, err := helpers.CreateSmallCardsBatch(filteredCars)
 				if err != nil {
-					log.Printf("Error Creating Cards:", err)
+					fmt.Println("Error creating cards.")
+					w.WriteHeader(http.StatusInternalServerError)
+					http.Error(w, "Error creating cards.", http.StatusInternalServerError)
+					return
 				}
 
 				manufacturers, categories, dataModels, err := helpers.FetchManCatMod()
 				if err != nil {
-					log.Printf("Error fetching categories: %v", err)
-					http.Error(w, "Failed to fetch items from the APO:", http.StatusInternalServerError)
+					fmt.Println("Error fetching data from the API.")
+					w.WriteHeader(http.StatusInternalServerError)
+					http.Error(w, "Error fetching data from the API.", http.StatusInternalServerError)
+					return
 				}
 
 				//	Create a variable to be sent together with the HTML.
@@ -552,14 +585,14 @@ func Filter(w http.ResponseWriter, r *http.Request) {
 
 				tmpl, err := template.ParseFiles(htmlTemplates...)
 				if err != nil {
-					log.Printf("Error. Filters - Parsing Template: %v\n", err)
+					fmt.Printf("Error Parsing Template: %v\n", err)
 					http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 					return
 				}
 
 				err = tmpl.ExecuteTemplate(w, "index.html", data)
 				if err != nil {
-					log.Printf("Error. Filters - Executing Template: %v\n", err)
+					fmt.Printf("Error Executing Template: %v\n", err)
 					http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 					return
 				}
@@ -570,7 +603,6 @@ func Filter(w http.ResponseWriter, r *http.Request) {
 		//	If the action contains some string. It means the submission
 		//	was triggered by the filter buttons.
 	} else if action != "" {
-		fmt.Println("Action is something")
 		selectedManufacturers := r.Form["manufacturer"]
 		selectedCategories := r.Form["category"]
 		selectedModels := r.Form["model"]
@@ -597,11 +629,13 @@ func Filter(w http.ResponseWriter, r *http.Request) {
 		case "clearModel":
 			helpers.ClearModelsFilterMap()
 		}
-		fmt.Println("Filter Maps Modified")
+
 		//	We fetch the filtered Cars
 		filteredCars, err := helpers.FetchFilteredCars()
 		if err != nil {
-			log.Printf("Error fetching filtered cars: %v", err)
+			fmt.Println("Error filtering data.")
+			w.WriteHeader(http.StatusInternalServerError)
+			http.Error(w, "Error filtering data.", http.StatusInternalServerError)
 			return
 		}
 
@@ -612,14 +646,19 @@ func Filter(w http.ResponseWriter, r *http.Request) {
 			//	Create for each car a small card.
 			cards, err := helpers.CreateSmallCardsBatch(filteredCars)
 			if err != nil {
-				log.Println("Error Creating Smmall Cards")
+				fmt.Println("Error creating cards.")
+				w.WriteHeader(http.StatusInternalServerError)
+				http.Error(w, "Error creating cards.", http.StatusInternalServerError)
+				return
 			}
 
 			//	Fetch manufacturers, categories and models.
 			manufacturers, categories, dataModels, err := helpers.FetchManCatMod()
 			if err != nil {
-				log.Printf("Error fetching categories: %v", err)
-				http.Error(w, "Failed to fetch items from the APO:", http.StatusInternalServerError)
+				fmt.Println("Error fetching data from the API.")
+				w.WriteHeader(http.StatusInternalServerError)
+				http.Error(w, "Error fetching data from the API.", http.StatusInternalServerError)
+				return
 			}
 
 			//	Create a variable to be sent together with the HTML.
@@ -640,23 +679,17 @@ func Filter(w http.ResponseWriter, r *http.Request) {
 
 			tmpl, err := template.ParseFiles(htmlTemplates...)
 			if err != nil {
-				log.Printf("Error. Filters - Parsing Template: %v\n", err)
+				fmt.Printf("Error Parsing Template: %v\n", err)
 				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 				return
 			}
 
 			err = tmpl.ExecuteTemplate(w, "index.html", data)
 			if err != nil {
-				log.Printf("Error. Filters - Executing Template: %v\n", err)
+				fmt.Printf("Error Executing Template: %v\n", err)
 				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 				return
 			}
 		}
 	}
-	fmt.Println("FILTER DONE")
-	fmt.Println("-------------------------------")
-	fmt.Println()
-	fmt.Println()
-	fmt.Println()
-	fmt.Println()
 }

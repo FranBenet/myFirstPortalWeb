@@ -11,7 +11,6 @@ import (
 // Takes one variable type models.Car (which has the same structure as the API)
 // and returns a variable type models.Card with all the information needed.
 func CreateSmallCard(car models.Car) (models.Card, error) {
-	fmt.Printf("Starting to create Card %d...", car.Id)
 
 	manufacturerChannel := make(chan models.Manufacturers, 1)
 	manufacturerErrChannel := make(chan error, 1)
@@ -24,14 +23,14 @@ func CreateSmallCard(car models.Car) (models.Card, error) {
 	manufacturer := <-manufacturerChannel
 	err := <-manufacturerErrChannel
 	if err != nil {
-		fmt.Println("Manufacturer Error")
+		fmt.Println("Error fetching data from the API")
 		return models.Card{}, err
 	}
 
 	category := <-categoryChannel
 	err = <-categoryErrChannel
 	if err != nil {
-		fmt.Println("Category Error")
+		fmt.Println("Error fetching data from the API")
 		return models.Card{}, err
 	}
 
@@ -50,7 +49,6 @@ func CreateSmallCard(car models.Car) (models.Card, error) {
 	card.Liked = config.FavouritesMap[car.Id]
 	card.Compared = config.ComparisonMap[car.Id]
 
-	fmt.Printf("Card ID: %v Created.", car.Id)
 	return card, nil
 }
 
@@ -59,7 +57,7 @@ func CreateSmallCardsBatch(carsSelected []models.Car) ([]models.Card, error) {
 	for _, car := range carsSelected {
 		card, err := CreateSmallCard(car)
 		if err != nil {
-			log.Printf("Error creating bid card: %v", err)
+			fmt.Printf("Error creating small card: %v", err)
 			return []models.Card{}, err
 		}
 		cards = append(cards, card)
@@ -70,7 +68,6 @@ func CreateSmallCardsBatch(carsSelected []models.Car) ([]models.Card, error) {
 // Takes one variable type models.Car (which has the same structure as the API)
 // and returns a variable type models.ExtendedCard with all the extended information wanted.
 func CreateBigCard(car models.Car) (models.ExtendedCard, error) {
-	fmt.Printf("Starting to create Card %d...", car.Id)
 
 	manufacturerChannel := make(chan models.Manufacturers, 1)
 	errManufacturerChannel := make(chan error, 1)
@@ -83,6 +80,7 @@ func CreateBigCard(car models.Car) (models.ExtendedCard, error) {
 	category := <-categoryChannel
 	err := <-errCategoryChannel
 	if err != nil {
+		fmt.Println("Error fetching data from the API")
 		return models.ExtendedCard{}, err
 	}
 
@@ -90,6 +88,7 @@ func CreateBigCard(car models.Car) (models.ExtendedCard, error) {
 	err = <-errManufacturerChannel
 
 	if err != nil {
+		fmt.Println("Error fetching data from the API")
 		return models.ExtendedCard{}, err
 	}
 
@@ -113,7 +112,6 @@ func CreateBigCard(car models.Car) (models.ExtendedCard, error) {
 	card.Liked = config.FavouritesMap[car.Id]
 	card.Compared = config.ComparisonMap[car.Id]
 
-	fmt.Printf("Card ID: %v Created.", car.Id)
 	return card, nil
 }
 
@@ -122,7 +120,7 @@ func CreateBigCardsBatch(carsSelected []models.Car) ([]models.ExtendedCard, erro
 	for _, car := range carsSelected {
 		card, err := CreateBigCard(car)
 		if err != nil {
-			log.Printf("Error creating bid card: %v", err)
+			log.Printf("Error creating big card: %v", err)
 			return []models.ExtendedCard{}, err
 		}
 		cards = append(cards, card)
@@ -150,6 +148,7 @@ func InitVariable(errChannel chan error) {
 	carsData := <-carsDataChannel
 	err = <-carsErrChannel
 	if err != nil {
+		fmt.Println("Error fetching data from the API")
 		errChannel <- err
 		return
 	}
@@ -157,6 +156,7 @@ func InitVariable(errChannel chan error) {
 	manufacturersData := <-manufacturersChannel
 	err = <-manufacturersErrChannel
 	if err != nil {
+		fmt.Println("Error fetching data from the API")
 		errChannel <- err
 		return
 	}
@@ -164,6 +164,7 @@ func InitVariable(errChannel chan error) {
 	categoriesData := <-categoriesChannel
 	err = <-categoriesErrChannel
 	if err != nil {
+		fmt.Println("Error fetching data from the API")
 		errChannel <- err
 		return
 	}
@@ -191,11 +192,9 @@ func InitVariable(errChannel chan error) {
 
 	errChannel <- nil
 	close(errChannel)
-	fmt.Println("Init Variable Done")
 }
 
 func SearchQueryCars(query string) ([]models.Car, error) {
-	fmt.Println("Search Query Cars Starting ....")
 
 	//	Fetch all the cars.
 	carsDataChannel := make(chan []models.Car, 1)
@@ -206,7 +205,7 @@ func SearchQueryCars(query string) ([]models.Car, error) {
 	cars := <-carsDataChannel
 	err := <-errChannel
 	if err != nil {
-		log.Printf("Error fetching cars: %v", err)
+		fmt.Println("Error fetching data from the API")
 		return []models.Car{}, err
 	}
 
@@ -225,14 +224,14 @@ func SearchQueryCars(query string) ([]models.Car, error) {
 		manufacturer := <-manufacturerChannel
 		err := <-errManufactureChannel
 		if err != nil {
-			log.Printf("Error fetching manufacturer ID: %v. %v", car.ManufacturerID, err)
+			fmt.Println("Error fetching data from the API")
 			return []models.Car{}, err
 		}
 
 		category := <-categoryChannel
 		err = <-errCategoryChannel
 		if err != nil {
-			log.Printf("Error fetching category ID: %v. %v", car.CategoryID, err)
+			fmt.Println("Error fetching data from the API")
 			return []models.Car{}, err
 		}
 
@@ -240,6 +239,5 @@ func SearchQueryCars(query string) ([]models.Car, error) {
 			filteredCars = append(filteredCars, car)
 		}
 	}
-	fmt.Println("Search Query Cars DONE.")
 	return filteredCars, nil
 }

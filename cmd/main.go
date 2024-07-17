@@ -19,10 +19,11 @@ func main() {
 
 	go helpers.InitVariable(errChannel)
 	err := <-errChannel
-
 	if err != nil {
-		fmt.Println("ERROR:", err)
+		fmt.Println("Error initiating program.")
+		log.Fatal(err)
 	}
+
 	fmt.Println("Running Server in 8080...")
 	if err := http.ListenAndServe(":8080", routes.Routes()); err != nil {
 		log.Fatal(err)

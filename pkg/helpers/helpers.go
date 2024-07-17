@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
 	"strconv"
 	"sync"
@@ -14,20 +13,16 @@ import (
 
 // Fetch a car from the API by ID.
 func FetchCar(id int, carChannel chan models.Car, errChannel chan error) {
-	// var mu sync.Mutex
-	// mu.Lock()
-	// defer mu.Unlock()
+
 	//	Convert the ID from int to string.
 	idString := strconv.Itoa(id)
 
 	// Attach the ID in string format to the URL to fetch.
 	car, err := http.Get("http://localhost:3000/api/models/" + idString)
 	if err != nil {
-		log.Printf("Error getting car categories information from the cars API: %v", err)
+		fmt.Printf("Error getting cars from the API: %v", err)
 		carChannel <- models.Car{}
 		errChannel <- err
-		// close(carChannel)
-		// close(errChannel)
 		return
 	}
 	defer car.Body.Close()
@@ -35,11 +30,9 @@ func FetchCar(id int, carChannel chan models.Car, errChannel chan error) {
 	//	Write the data in []byte type.
 	data, err := io.ReadAll(car.Body)
 	if err != nil {
-		log.Printf("Error. FetchCar() - io.ReadAll error: %v", err)
+		fmt.Printf("Error reading cars data: %v", err)
 		carChannel <- models.Car{}
 		errChannel <- err
-		// close(carChannel)
-		// close(errChannel)
 		return
 	}
 
@@ -48,32 +41,24 @@ func FetchCar(id int, carChannel chan models.Car, errChannel chan error) {
 
 	err = json.Unmarshal(data, &carData)
 	if err != nil {
-		log.Printf("Error. FetchCar() - json.Unmarshall error: %v", err)
+		fmt.Printf("Error unmarshalling data: %v", err)
 		carChannel <- models.Car{}
 		errChannel <- err
-		// close(carChannel)
-		// close(errChannel)
 		return
 	}
 
 	carChannel <- carData
 	errChannel <- nil
-	// close(carChannel)
-	// close(errChannel)
-	fmt.Println("Car Fetched" + carData.Name)
 }
 
 // Fetch all cars from the API.
 func FetchCars(carsDataChannel chan []models.Car, errChannel chan error) {
 
-	fmt.Println("Starting to Fetch Cars...")
 	cars, err := http.Get("http://localhost:3000/api/models")
 	if err != nil {
-		log.Printf("Error getting carModels information from the cars API: %v", err)
+		fmt.Printf("Error getting cars from the API: %v", err)
 		carsDataChannel <- nil
 		errChannel <- err
-		// close(carsDataChannel)
-		// close(errChannel)
 		return
 	}
 	defer cars.Body.Close()
@@ -81,33 +66,26 @@ func FetchCars(carsDataChannel chan []models.Car, errChannel chan error) {
 	var carsData []models.Car
 
 	if err = json.NewDecoder(cars.Body).Decode(&carsData); err != nil {
-		log.Fatalf("Failed to decode JSON carsData: %v", err)
+		fmt.Printf("Error unmarshalling data: %v", err)
 		carsDataChannel <- nil
 		errChannel <- err
-		// close(carsDataChannel)
-		// close(errChannel)
 		return
 	}
 
 	carsDataChannel <- carsData
 	errChannel <- nil
-	// close(carsDataChannel)
-	// close(errChannel)
-	fmt.Println("Cars Fetched.")
 }
 
 // Fetch a category from the API by ID.
 func FetchCategory(id int, categoryChannel chan models.Categories, errChannel chan error) {
-	fmt.Printf("Starting to Fetch Category %d...", id)
+
 	idString := strconv.Itoa(id)
 
 	category, err := http.Get("http://localhost:3000/api/categories/" + idString)
 	if err != nil {
-		log.Printf("Error getting car categories information from the cars API: %v", err)
+		fmt.Printf("Error getting category from the API: %v", err)
 		categoryChannel <- models.Categories{}
 		errChannel <- err
-		// close(categoryChannel)
-		// close(errChannel)
 		return
 	}
 	defer category.Body.Close()
@@ -115,26 +93,21 @@ func FetchCategory(id int, categoryChannel chan models.Categories, errChannel ch
 	var categoryData models.Categories
 
 	if err = json.NewDecoder(category.Body).Decode(&categoryData); err != nil {
-		log.Printf("Failed to decode JSON categories: %v", err)
+		fmt.Printf("Error unmarshalling data: %v", err)
 		categoryChannel <- models.Categories{}
 		errChannel <- err
-		// close(categoryChannel)
-		// close(errChannel)
 		return
 	}
 	categoryChannel <- categoryData
 	errChannel <- nil
-	// close(categoryChannel)
-	// close(errChannel)
-	fmt.Println("Category Fetched.")
 }
 
 // Fetch all categories from the API.
 func FetchCategories(categoriesChannel chan []models.Categories, errChannel chan error) {
-	fmt.Println("Starting to Fetch Categories...")
+
 	categories, err := http.Get("http://localhost:3000/api/categories")
 	if err != nil {
-		log.Printf("Error getting car categories information from the cars API: %v", err)
+		fmt.Printf("Error getting categories from the API: %v", err)
 		categoriesChannel <- nil
 		errChannel <- err
 		close(categoriesChannel)
@@ -146,7 +119,7 @@ func FetchCategories(categoriesChannel chan []models.Categories, errChannel chan
 	var categoriesData []models.Categories
 
 	if err = json.NewDecoder(categories.Body).Decode(&categoriesData); err != nil {
-		log.Printf("Failed to decode JSON categories: %v", err)
+		fmt.Printf("Error unmarshalling data: %v", err)
 		categoriesChannel <- nil
 		errChannel <- err
 		close(categoriesChannel)
@@ -157,21 +130,18 @@ func FetchCategories(categoriesChannel chan []models.Categories, errChannel chan
 	errChannel <- nil
 	close(categoriesChannel)
 	close(errChannel)
-	fmt.Println("Categories fetched.")
 }
 
 // Fetch a manufacturer from the API by ID.
 func FetchManufacturer(id int, manufacturerChannel chan models.Manufacturers, errChannel chan error) {
-	fmt.Printf("Starting to Fetch Manufacturer %d...", id)
+
 	idString := strconv.Itoa(id)
 
 	manufacturer, err := http.Get("http://localhost:3000/api/manufacturers/" + idString)
 	if err != nil {
-		log.Printf("Error getting car categories information from the cars API: %v", err)
+		fmt.Printf("Error getting manufacturer from the API: %v", err)
 		manufacturerChannel <- models.Manufacturers{}
 		errChannel <- err
-		// close(manufacturerChannel)
-		// close(errChannel)
 		return
 	}
 	defer manufacturer.Body.Close()
@@ -179,26 +149,21 @@ func FetchManufacturer(id int, manufacturerChannel chan models.Manufacturers, er
 	var manufacturerData models.Manufacturers
 
 	if err = json.NewDecoder(manufacturer.Body).Decode(&manufacturerData); err != nil {
-		log.Printf("Failed to decode JSON categories: %v", err)
+		fmt.Printf("Error unmarshalling data: %v", err)
 		manufacturerChannel <- models.Manufacturers{}
 		errChannel <- err
-		// close(manufacturerChannel)
-		// close(errChannel)
 		return
 	}
 	manufacturerChannel <- manufacturerData
 	errChannel <- nil
-	// close(manufacturerChannel)
-	// close(errChannel)
-	fmt.Println("Manufacturer Fetched.")
 }
 
 // Fetch all manufacturers from the API.
 func FetchManufacturers(manufacturersChannel chan []models.Manufacturers, errChannel chan error) {
-	fmt.Println("Starting to Fetch Manufacturers...")
+
 	manufacturers, err := http.Get("http://localhost:3000/api/manufacturers")
 	if err != nil {
-		log.Printf("Error getting car categories information from the cars API:%v", err)
+		fmt.Printf("Error getting manufacturers from the API: %v", err)
 		manufacturersChannel <- nil
 		errChannel <- err
 		close(manufacturersChannel)
@@ -210,7 +175,7 @@ func FetchManufacturers(manufacturersChannel chan []models.Manufacturers, errCha
 	var manufacturersData []models.Manufacturers
 
 	if err = json.NewDecoder(manufacturers.Body).Decode(&manufacturersData); err != nil {
-		log.Printf("Failed to decode JSON categories: %v", err)
+		fmt.Printf("Error unmarshalling data: %v", err)
 		manufacturersChannel <- nil
 		errChannel <- err
 		close(manufacturersChannel)
@@ -222,12 +187,11 @@ func FetchManufacturers(manufacturersChannel chan []models.Manufacturers, errCha
 	errChannel <- nil
 	close(manufacturersChannel)
 	close(errChannel)
-	fmt.Println("Manufacturers Fetched")
 }
 
 // Fetch all models from the API.
 func FetchModels(modelsChannel chan []models.Modelcar, errChannel chan error) {
-	fmt.Println("Starting to Fetch Models...")
+
 	var carModels []models.Modelcar
 	var mu sync.Mutex
 
@@ -239,7 +203,7 @@ func FetchModels(modelsChannel chan []models.Modelcar, errChannel chan error) {
 	err := <-carsErrChannel
 
 	if err != nil {
-		log.Printf("Error Fetching Cars: %v", err)
+		fmt.Printf("Error fetching data from the API")
 		modelsChannel <- nil
 		errChannel <- err
 		return
@@ -258,7 +222,6 @@ func FetchModels(modelsChannel chan []models.Modelcar, errChannel chan error) {
 	errChannel <- nil
 	close(modelsChannel)
 	close(errChannel)
-	fmt.Println("Models Fetched.")
 }
 
 // Fetch all. Manufacturers, Categories and Models.
@@ -277,21 +240,21 @@ func FetchManCatMod() ([]models.Manufacturers, []models.Categories, []models.Mod
 	categories := <-categoriesChannel
 	err := <-errCategoriesChannel
 	if err != nil {
-		log.Printf("Error fetching categories: %v", err)
+		fmt.Println("Error fetching categories from the API.")
 		return nil, nil, nil, err
 	}
 
 	manufacturers := <-manufacturersChannel
 	err = <-errManufacturersChannel
 	if err != nil {
-		log.Printf("Error fetching manufacturers: %v", err)
+		fmt.Println("Error fetching manufacturers from the API.")
 		return nil, nil, nil, err
 	}
 
 	dataModels := <-modelsChannel
 	err = <-errModelsChannel
 	if err != nil {
-		log.Printf("Error fetching models: %v", err)
+		fmt.Println("Error fetching models from the API.")
 		return nil, nil, nil, err
 	}
 	return manufacturers, categories, dataModels, nil
@@ -299,10 +262,8 @@ func FetchManCatMod() ([]models.Manufacturers, []models.Categories, []models.Mod
 
 // Fetch only the cars from the API, that follows the CategoriesFilterMap, ManufacturersFilterMap and ModelsFIlterMap variables.
 func FetchFilteredCars() ([]models.Car, error) {
+
 	var carsFiltered []models.Car
-	//	Loop through all the cars from the API and collect those whose CategoryID, ManufacturerId and Name have a value of true in
-	//	the corresponding maps: CategoriesFilterMap, ManufacturerFilterMap and ModelsFilterMap.
-	fmt.Println("Starting FetchFilteredCars....")
 
 	carsDataChannel := make(chan []models.Car, 1)
 	errChannel := make(chan error, 1)
@@ -312,7 +273,7 @@ func FetchFilteredCars() ([]models.Car, error) {
 	carsData := <-carsDataChannel
 	err := <-errChannel
 	if err != nil {
-		log.Printf("Error Fetching Cars: %v", err)
+		fmt.Println("Error fetching cars from the API.")
 		return nil, err
 	}
 
@@ -321,16 +282,15 @@ func FetchFilteredCars() ([]models.Car, error) {
 			carsFiltered = append(carsFiltered, car)
 		}
 	}
-	fmt.Println("FetchFilteredCars DONE")
 	return carsFiltered, nil
 }
 
 // Fetch only the cars from the API, that are indicated in FavouritesMap variable.
 func FetchFavouriteCars() ([]models.Car, error) {
-	fmt.Println("Starting to Fetch Favourite Cars...")
 
 	var favouriteCars []models.Car
 	var carsSelected []int
+
 	//	Get every ID car from Favourites Map.
 	for id, value := range config.FavouritesMap {
 		if !value {
@@ -350,6 +310,7 @@ func FetchFavouriteCars() ([]models.Car, error) {
 		go FetchCar(carId, carsDataChannel, errChannel)
 	}
 
+	//	Check all the error messages from the channel and append the cars to the variable.
 	for i := 0; i < len(carsSelected); i++ {
 		err = <-errChannel
 		car = <-carsDataChannel
@@ -359,14 +320,13 @@ func FetchFavouriteCars() ([]models.Car, error) {
 			favouriteCars = append(favouriteCars, car)
 		}
 	}
-	fmt.Println("Favourite Cars Fetched")
 	return favouriteCars, nil
 }
 
 // Modify the global variable FavouritesMap.
 func ModifyFavouritesMap(carId int) {
 	config.FavouritesMap[carId] = !config.FavouritesMap[carId]
-	fmt.Println("Favourite Map Modified")
+
 }
 
 // Fetch only the cars from the API, that are indicated in ComparisonMap variable.
@@ -400,7 +360,6 @@ func FetchComparedCars(compareMap map[int]bool) ([]models.Car, error) {
 			comparedCars = append(comparedCars, car)
 		}
 	}
-	fmt.Println("Compared Cars Fetched")
 	return comparedCars, nil
 }
 
@@ -420,7 +379,7 @@ func ModifyComparisonMap(carId int) {
 	} else {
 		config.CompareActive = false
 	}
-	fmt.Println("Comparison Map Modified")
+
 }
 
 // Resets the global variable ComparisonMap.
@@ -431,7 +390,7 @@ func ClearComparisonMap() {
 		config.ComparisonMap[key] = false
 	}
 	config.CompareActive = false
-	fmt.Println("Comparison Map Cleared")
+
 }
 
 // Modify the global variable CategoriesFilterMap.
@@ -443,7 +402,7 @@ func ModifyCategoriesFilterMap(selectedItems []string) error {
 		for _, category := range selectedItems {
 			categoryId, err := strconv.Atoi(category)
 			if err != nil {
-				log.Printf("Error. Could not modify the CategoriesFilterMap: %v", err)
+				fmt.Println("Error converting category to int.")
 				return err
 			}
 			config.CategoriesFilterMap[categoryId] = true
@@ -474,7 +433,7 @@ func ModifyManufacturersFilterMap(selectedItems []string) error {
 		for _, manufacturer := range selectedItems {
 			manufacturerId, err := strconv.Atoi(manufacturer)
 			if err != nil {
-				log.Printf("Error. Could not modify the ManufacturersFilterMap: %v", err)
+				fmt.Println("Error converting manufacture to int.")
 				return err
 			}
 			config.ManufacturersFilterMap[manufacturerId] = true
@@ -541,43 +500,3 @@ func CreateLastCompareMap() {
 		config.LastCompare[key] = value
 	}
 }
-
-// func FetchFavouriteCars() ([]models.Car, error) {
-// 	fmt.Println("Starting to Fetch Favourite Cars...")
-// 	var favouriteCars []models.Car
-// 	var wg sync.WaitGroup
-// 	var err error
-// 	var car models.Car
-
-// 	// Loop through the FavouritesMap and fetch the cars whose ID have a value true on the map.
-// 	for id, value := range config.FavouritesMap {
-// 		if value {
-// 			wg.Add(1)
-// 			fmt.Println("Starting go routine.")
-// 			carChannel := make(chan models.Car)
-// 			carErrChannel := make(chan error)
-
-// 			go func(id int) {
-// 				FetchCar(id, carChannel, carErrChannel)
-// 				car = <-carChannel
-// 				err = <-carErrChannel
-// 				defer close(carChannel)
-// 				defer close(carErrChannel)
-// 			}(id)
-// 		} else {
-// 			continue
-// 		}
-
-// 		if err != nil {
-// 			log.Printf("Error Fetching Car %v: %v", id, err)
-// 			return []models.Car{}, err
-// 		} else {
-// 			favouriteCars = append(favouriteCars, car)
-// 		}
-
-// 	}
-
-// 	fmt.Println("Favourite Cars Fetched")
-
-// 	return favouriteCars, nil
-// }
