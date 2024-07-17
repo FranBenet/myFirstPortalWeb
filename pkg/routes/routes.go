@@ -12,7 +12,12 @@ func Routes() *http.ServeMux {
 	mux.Handle("/static/", http.StripPrefix("/static", fileServer))
 
 	mux.HandleFunc("/", handlers.Homepage)
-	// mux.HandleFunc("/gallery", handlers.Gallery)
+	mux.HandleFunc("/id", handlers.SelectCar)
+	mux.HandleFunc("/liked-compared", handlers.StatusChange)
+	mux.HandleFunc("/comparePage", handlers.ComparePage)
+	mux.HandleFunc("/lastCompare", handlers.LastCompare)
+	mux.HandleFunc("/favouritePage", handlers.FavouritesPage)
+	mux.HandleFunc("/search", handlers.Filter)
 
 	return mux
 }

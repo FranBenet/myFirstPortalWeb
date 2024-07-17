@@ -1,12 +1,22 @@
 {{define "main-bar"}}
-<header class="top-bar">
-    <button class="main-button">
-        <img class="logo" src="../static/icons/logo.jpeg" alt="LOGO">
-    </button>
-    <div class="header-icons-container">
-        <span class="material-symbols-outlined icon search-icon">search</span>
-        <span class="material-symbols-outlined icon search-icon">favorite</span>
-        <span class="material-symbols-outlined icon search-icon">compare_arrows</span>
-    </div>
-</header>
+    <header class="top-bar">
+        <a href="http://localhost:8080/" class="main-button">
+            <img class="logo" src="../static/icons/logo.jpeg" alt="LOGO">
+        </a>
+        <div class="header-icons-container">
+            <!-- <a href="http://localhost:8080/search-page" class="search-page-button page-button">
+                <span class="material-symbols-outlined icon search-icon">search</span>
+                <p class="text-icons">Needs to dissapear</p>
+            </a> -->
+            <a href="/favouritePage" class="fav-page-button page-button">
+                <span class="material-symbols-outlined icon fav-icon">favorite</span>
+                <p class="text-icons">My Favourites</p>
+            </a>
+            <a href="/lastCompare" class="last-compare-page-button page-button">
+                <span class="material-symbols-outlined icon last-compare-icon">compare_arrows</span>
+                <p class="text-icons">Last Compare</p>
+            </a>
+            
+        </div>
+    </header>
 {{end}}

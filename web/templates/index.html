@@ -9,39 +9,56 @@
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@300..700&display=swap" rel="stylesheet">
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" />
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
         <link rel="stylesheet" href="../static/css/index.css" type="text/css">
+        <link rel="stylesheet" href="../static/css/main-bar.css" type="text/css">
+        <link rel="stylesheet" href="../static/css/filter-area.css" type="text/css">
         <link rel="stylesheet" href="../static/css/filter-button.css" type="text/css">
+        <link rel="stylesheet" href="../static/css/card.css" type="text/css">
     </head>
 
     <body>
         {{template "main-bar" .}}
         <section class="search-section">
-            <section class="search-container">
-                <section class="search-area">
-                    <p>Find quickly your car</p>
-                    <div class="search-icons-container">
-                        <img class="icon-brand audi-icon" src="../static/icons/audi.svg" alt="Audi Icon">
-                        <img class="icon-brand bmw-icon" src="../static/icons/bmw.svg" alt="BMW Icon">
-                        <img class="icon-brand honda-icon" src="../static/icons/honda.svg" alt="Honda Icon">
-                        <img class="icon-brand mercedes-icon" src="../static/icons/mercedes-benz-alt.svg" alt="Mercedes-Benz Icon">
-                        <img class="icon-brand toyota-icon" src="../static/icons/toyota.svg" alt="Toyota Icon">
-                    </div>
-                    <div class="search-bar-container">
-                        <input class="search-bar" type="search" name="" id="search-text" placeholder="Search by branch, etc, etc">
-                        <span class="material-symbols-outlined magnifier-icon">search</span>
-                    </div>
-                </section>
+            <div class="search-container">
+                <form class="form-search-bar" action="/search" method="get" name="filter-form">
+                    <section class="search-area">
+                        <p>Find quickly your car</p>
+                        <div class="search-bar-container">
+                            <input class="search-bar" type="search" name="searchRequest" id="search-text" placeholder="Search by branch, etc, etc">
+                            <span class="material-symbols-outlined magnifier-icon">search</span>
+                        </div>
+                    </section>
+                </form>
                 <hr class="div-bar">
                 {{template "filter" .}}
-            </section>
+            </div>
+            {{if .CompareActive}}
+            <div class="compare-container">
+                <a href="/comparePage" class="compare-button">
+                    <span class="material-symbols-outlined compare-icon">compare_arrows</span>
+                    <p class="compare-text">Compare</p>
+                </a>
+            </div>
+            {{else}}
+            <div class="compare-container-disabled">
+                <a href="/comparePage" class="compare-button-disabled">
+                    <span class="material-symbols-outlined compare-icon-disabled">compare_arrows</span>
+                    <p class="compare-text-disabled">Compare</p>
+                </a>
+            </div>
+            {{end}}
         </section>
-            <div class="gallery">
+        <div class="gallery">
+            <p class="{{if .NoResults}}noresults{{else}}results{{end}}">0 results found</p>
+            {{if .NoResults}}
+            {{else}}
                 <div class="area02">
                     {{range .Card}}
                         {{template "card" .}}
                     {{end}}
                 </div>
-            </div>
+            {{end}}
+        </div>
     </body>
 </html>

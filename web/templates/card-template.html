@@ -1,5 +1,5 @@
 {{define "card"}}
-   <a href="to-determine" class="card">
+   <a href="/id?id={{.Id}}" class="card">
       <div class="img-area">
          <img class="img-car" src="http://localhost:3000/api/images/{{.Image}}" alt="Car Image">
       </div>
@@ -9,11 +9,11 @@
          </div>
          <hr>
          <div class="text-box">
-            <p>{{.Specs}}</p>
+            <p>{{.Manufacturer}}</p>
          </div>
          <hr>
          <div class="text-box">
-            <p>{{.CategoryID}}</p>
+            <p>{{.Category}}</p>
          </div>
          <hr>
          <div class="text-box">
@@ -21,6 +21,66 @@
          </div>
          <hr>
       </div>
-      <button class="material-symbols-outlined heart-icon favorite-icon">favorite</button>
+      <form action="/liked-compared" method="POST" class="like-comp-form">
+         <input type="hidden" name="form_id" value={{.Id}}>
+         <button class="material-symbols-outlined form-icon {{if .Liked}} fav-active-icon {{else}} fav-deactive-icon {{end}}" name="trigger" value="favorite">favorite</button>
+         <button class="material-symbols-outlined form-icon {{if .Compared}} comp-active-icon {{else}} comp-deactive-icon {{end}}" name="trigger" value="compare">compare_arrows</button>
+      </form>
    </a>
+{{end}}
+
+{{define "card-extended"}}
+<div class="card-ext">
+   <div class="img-area-ext">
+      <img class="img-car-ext" src="http://localhost:3000/api/images/{{.Image}}" alt="Car Image">
+   </div>
+   <div class="info-area-ext">
+      <div class="text-box-ext">
+         <p >{{.Name}}</p>
+      </div>
+      <hr>
+      <div class="text-box-ext">
+         <p>{{.Category}}</p>
+      </div>
+      <hr>
+      <div class="text-box-ext">
+         <p>{{.Year}}</p>
+      </div>
+      <hr>
+      <div class="text-box-ext">
+         <p>{{.Engine}}</p>
+      </div>
+      <hr>
+      <div class="text-box-ext">
+         <p>{{.Horsepower}}</p>
+      </div>
+      <hr>
+      <div class="text-box-ext">
+         <p>{{.Transmission}}</p>
+      </div>
+      <hr>
+      <div class="text-box-ext">
+         <p>{{.DriveTrain}}</p>
+      </div>
+      <hr>
+      <div class="text-box-ext">
+         <p>{{.Manufacturer}}</p>
+      </div>
+      <hr>
+      <div class="text-box-ext">
+         <p>{{.FoundingYear}}</p>
+      </div>
+      <hr>
+      <div class="text-box-ext">
+         <p>{{.Country}}</p>
+      </div>
+      <hr>
+   </div>
+   <form action="/liked-compared" method="POST" class="like-comp-form">
+      <input type="hidden" name="form_id" value={{.Id}}>
+      <button class="material-symbols-outlined form-icon {{if .Liked}} fav-active-icon {{else}} fav-deactive-icon {{end}}" name="trigger" value="favorite">favorite</button>
+      <button class="material-symbols-outlined form-icon {{if .Compared}} comp-active-icon {{else}} comp-deactive-icon {{end}}" name="trigger" value="compare">compare_arrows</button>
+   </form>
+</div>
+
 {{end}}

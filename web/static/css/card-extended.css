@@ -1,0 +1,138 @@
+.gallery{
+    margin-top: 120px;
+}
+
+.area02 {
+    display: flex;
+    flex-flow: row wrap;
+    background-color: rgb(238, 238, 238);
+    justify-content: center;
+}
+
+.noresults {
+    display: flex;
+    size: 100%;
+    font-size: 25px;
+    color: #131842;
+    font-weight: 500;
+    place-content: center;
+}
+
+.results {
+    display: none;   
+}
+
+.card-ext {
+    position: relative;
+    display: flex;
+    flex-flow: column nowrap;
+    width: 535px;
+    height: 900px;
+    overflow: hidden;
+    border-radius: 20px 20px 0px 0px;
+    background-color: white;
+    box-shadow: 1px 1px 8px 0px #e0e0e0;
+    margin: 20px;
+    align-items: center;
+}
+
+.img-area-ext {
+    position: relative;
+    display: flex;
+    width: 540px;
+    height: 300px;
+}
+
+.img-car-ext {
+    position: absolute;
+    width: 540px;
+    height: 300px;
+    object-fit: cover;
+}
+
+.like-comp-form{
+    position: absolute;
+    width: 535px;
+    height: 900px;
+    display: flex;
+    flex-flow: column wrap;
+    justify-content: space-between;
+    align-items: end;
+}
+
+.form-icon{
+    color: #E68369;
+    margin: 10px 10px 10px 10px;
+}
+
+.fav-deactive-icon {
+    cursor: pointer;
+    background-color: rgba(255, 255, 255, 0);
+    font-variation-settings:
+        'FILL' 0,
+        'wght' 700,
+        'GRAD' 0,
+        'opsz' 24; 
+}
+
+.fav-active-icon{
+    cursor: pointer;
+    background-color: rgba(255, 255, 255, 0);
+    font-variation-settings:
+        'FILL' 1,
+        'wght' 700,
+        'GRAD' 0,
+        'opsz' 24; 
+}
+
+.comp-deactive-icon {
+    cursor: pointer;
+    border: 2px solid #E68369;
+    border-radius: 80px;
+    background-color: rgba(255, 255, 255, 0);
+    font-variation-settings:
+    'FILL' 0,
+    'wght' 400,
+    'GRAD' 0,
+    'opsz' 24; 
+}
+
+.comp-active-icon {
+    cursor: pointer;
+    border: 2px solid #E68369;
+    border-radius: 80px;
+    background-color: #E68369;
+    color: white;
+    font-variation-settings:
+    'FILL' 0,
+    'wght' 400,
+    'GRAD' 0,
+    'opsz' 24; 
+}
+
+.info-area-ext {
+    position: relative;
+    display: flex;
+    flex-flow: column wrap;
+    font-family: "Quicksand", sans-serif;
+    font-weight: 500;
+    font-size: 20px;
+    margin: 40px;
+}
+
+.text-box-ext {
+    display: flex;
+    height: 30px;
+    width: 300px;
+    overflow: hidden;
+    justify-content: center;
+    align-items: center;
+    margin-top: 0px;
+    padding-top: 0px;
+    text-decoration: none;
+}
+
+hr {
+    width: 6%;
+    color: #E68369;
+}
