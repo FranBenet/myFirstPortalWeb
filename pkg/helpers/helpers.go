@@ -20,7 +20,7 @@ func FetchCar(id int, carChannel chan models.Car, errChannel chan error) {
 	// Attach the ID in string format to the URL to fetch.
 	car, err := http.Get("http://localhost:3000/api/models/" + idString)
 	if err != nil {
-		fmt.Printf("Error getting cars from the API: %v", err)
+		fmt.Printf("Error getting cars from the API: %v\n", err)
 		carChannel <- models.Car{}
 		errChannel <- err
 		return
@@ -41,7 +41,7 @@ func FetchCar(id int, carChannel chan models.Car, errChannel chan error) {
 
 	err = json.Unmarshal(data, &carData)
 	if err != nil {
-		fmt.Printf("Error unmarshalling data: %v", err)
+		fmt.Printf("Error unmarshalling data: %v\n", err)
 		carChannel <- models.Car{}
 		errChannel <- err
 		return
@@ -83,7 +83,7 @@ func FetchCategory(id int, categoryChannel chan models.Categories, errChannel ch
 
 	category, err := http.Get("http://localhost:3000/api/categories/" + idString)
 	if err != nil {
-		fmt.Printf("Error getting category from the API: %v", err)
+		fmt.Printf("Error getting category from the API: %v\n", err)
 		categoryChannel <- models.Categories{}
 		errChannel <- err
 		return
@@ -107,7 +107,7 @@ func FetchCategories(categoriesChannel chan []models.Categories, errChannel chan
 
 	categories, err := http.Get("http://localhost:3000/api/categories")
 	if err != nil {
-		fmt.Printf("Error getting categories from the API: %v", err)
+		fmt.Printf("Error getting categories from the API: %v\n", err)
 		categoriesChannel <- nil
 		errChannel <- err
 		close(categoriesChannel)
@@ -139,7 +139,7 @@ func FetchManufacturer(id int, manufacturerChannel chan models.Manufacturers, er
 
 	manufacturer, err := http.Get("http://localhost:3000/api/manufacturers/" + idString)
 	if err != nil {
-		fmt.Printf("Error getting manufacturer from the API: %v", err)
+		fmt.Printf("Error getting manufacturer from the API: %v\n", err)
 		manufacturerChannel <- models.Manufacturers{}
 		errChannel <- err
 		return
@@ -163,7 +163,7 @@ func FetchManufacturers(manufacturersChannel chan []models.Manufacturers, errCha
 
 	manufacturers, err := http.Get("http://localhost:3000/api/manufacturers")
 	if err != nil {
-		fmt.Printf("Error getting manufacturers from the API: %v", err)
+		fmt.Printf("Error getting manufacturers from the API: %v\n", err)
 		manufacturersChannel <- nil
 		errChannel <- err
 		close(manufacturersChannel)
