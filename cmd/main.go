@@ -2,7 +2,6 @@ package main
 
 import (
 	"cars/pkg/helpers"
-	"cars/pkg/middleware"
 	"cars/pkg/routes"
 	"fmt"
 	"log"
@@ -18,9 +17,6 @@ func main() {
 	// Get the router from the routes package
 	router := routes.Routes()
 
-	// Wrap the mux with the errorHandler middleware
-	wrappedRouter := middleware.ErrorHandler(router)
-
 	errChannel := make(chan error, 1)
 	defer close(errChannel)
 
@@ -32,7 +28,7 @@ func main() {
 	}
 
 	fmt.Println("Running Server in 8080...")
-	if err := http.ListenAndServe(":8080", wrappedRouter); err != nil {
+	if err := http.ListenAndServe(":8080", router); err != nil {
 		log.Fatal(err)
 	}
 }

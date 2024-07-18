@@ -5,7 +5,9 @@ import (
 	"cars/pkg/models"
 	"fmt"
 	"log"
+	"net/http"
 	"strings"
+	"text/template"
 )
 
 // Takes one variable type models.Car (which has the same structure as the API)
@@ -240,4 +242,22 @@ func SearchQueryCars(query string) ([]models.Car, error) {
 		}
 	}
 	return filteredCars, nil
+}
+
+func RenderTemplate(w http.ResponseWriter, htmlTemplate []string, name string, data models.DataResponse) {
+
+	tmpl, err := template.ParseFiles(htmlTemplate...)
+	if err != nil {
+		fmt.Printf("Error Parsing Template: %v\n", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+	err = tmpl.ExecuteTemplate(w, name, data)
+	if err != nil {
+		fmt.Printf("Error Executing Template: %v\n", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
 }
