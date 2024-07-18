@@ -38,13 +38,14 @@
     display: none;
     position: absolute;
     background-color: #f9f9f9;
-    min-width: 200px;
+    min-width: 180px;
     max-height: 400px; 
     overflow-y: auto; 
     box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
     border-radius: 4px;
     z-index: 1;
     padding-top: 8px;
+    padding-left: 10px;
 }
 
 .dropdown:hover .dropdown-content {
@@ -68,7 +69,7 @@
     cursor: pointer;
 }
 
-.empty-button {
+/* .empty-button {
     display: inline-flex;
     width: 60px;
     height: 36px;
@@ -82,10 +83,10 @@
     margin: 10px 0px 10px 10px;
     justify-content: center;
     align-items: center;
-}
+} */
 
 .accept-button {
-    display: inline-flex;
+    display: flex;
     width: 80px;
     height: 36px;
     border: 2px solid #131842;
@@ -93,7 +94,7 @@
     background-color: rgb(224, 224, 224);
     font-size: 16px;
     font-weight: 700;
-    margin: 10px 15px 10px 25px;
+    margin: 10px 15px 10px 15px;
     cursor: pointer;
     justify-content: center;
     align-items: center;

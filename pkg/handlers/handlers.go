@@ -13,6 +13,7 @@ import (
 
 // Responds with the index page including the gallery of all the cars from the API.
 func Homepage(w http.ResponseWriter, r *http.Request) {
+
 	if r.URL.Path != "/" {
 		fmt.Printf("Error. Path Not Allowed")
 		http.Error(w, "Not Found", http.StatusNotFound)
@@ -614,20 +615,20 @@ func Filter(w http.ResponseWriter, r *http.Request) {
 		case "acceptManufacturer":
 			helpers.ModifyAllFilterMaps(selectedManufacturers, selectedCategories, selectedModels)
 
-		case "clearManufacturer":
-			helpers.ClearManufacturersFilterMap()
+		// case "clearManufacturer":
+		// 	helpers.ClearManufacturersFilterMap()
 
 		case "acceptCategory":
 			helpers.ModifyAllFilterMaps(selectedManufacturers, selectedCategories, selectedModels)
 
-		case "clearCategory":
-			helpers.ClearCategoriesFilterMap()
+		// case "clearCategory":
+		// 	helpers.ClearCategoriesFilterMap()
 
 		case "acceptModel":
 			helpers.ModifyAllFilterMaps(selectedManufacturers, selectedCategories, selectedModels)
 
-		case "clearModel":
-			helpers.ClearModelsFilterMap()
+			// case "clearModel":
+			// 	helpers.ClearModelsFilterMap()
 		}
 
 		//	We fetch the filtered Cars
